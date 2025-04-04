@@ -1,0 +1,106 @@
+# Our Workflow file for Continuous Integration (CI) using GitHub Actions
+name: MAUI CI Pipeline
+
+# Events (triggers) that will start this workflow
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ] 
+  # Allow manual triggering from the GitHub UI
+  workflow_dispatch:    
+
+# Define environment variables that will be available to all jobs and steps
+env:
+  DOTNET_VERSION: '9.0.201' 
+  SOLUTION_FILE: 'TenzrDemoApp.sln' 
+
+# Define the jobs that this workflow will run
+jobs:
+  # First job: Build and test the Windows version of the app
+  build:
+    name: Build and Test
+    runs-on: windows-latest  #
+    
+    steps:
+    # Step 1: Get the source code from the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3 
+    
+    # Step 2: Install the .NET SDK matching our version
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}  
+    
+    # Step 3: Install the MAUI workload to enable MAUI app building
+    - name: Install MAUI workload
+      run: dotnet workload install maui  
+    
+    # Step 4: Restore NuGet packages for the project
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_FILE }} 
+    
+    # Step 5: Build the Windows version of the application
+    - name: Build Windows
+      run: dotnet build ${{ env.SOLUTION_FILE }} -c Release -f net9.0-windows10.0.19041.0
+      
+    # Step 6: Run any unit tests in the solution
+    - name: Run tests
+      run: dotnet test ${{ env.SOLUTION_FILE }} --no-build --verbosity normal
+      if: success()  
+    
+    # Step 7: Save the build output files for later download
+    - name: Upload Windows build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-app  
+        path: | 
+          **/bin/Release/**/*.msix  # Windows app package
+          **/bin/Release/**/*.nupkg  # NuGet packages
+        if-no-files-found: warn  
+
+  # Second job: Build the Android version of the app
+  build-android:
+    name: Build Android App
+    runs-on: windows-latest 
+    
+    steps:
+    # Step 1: Get the source code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    # Step 2: Install .NET SDK
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    # Step 3: Install MAUI and Android workloads
+    - name: Install MAUI workload
+      run: dotnet workload install maui android
+    
+    # Step 4: Setup Java (required for Android builds)
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'microsoft'  
+        java-version: '11' 
+    
+    # Step 5: Restore NuGet packages
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_FILE }}
+    
+    # Step 6: Build the Android version of the app
+    - name: Build Android App
+      run: dotnet build ${{ env.SOLUTION_FILE }} -c Release -f net9.0-android
+    
+    # Step 7: Save the Android build outputs
+    - name: Upload Android build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: android-app  # Name of the artifact
+        path: |  # Files to include
+          **/bin/Release/**/*.apk  # Android application package
+          **/bin/Release/**/*.aab  # Android app bundle (for Play Store)
+        if-no-files-found: warn  # Just warn if no files are found
