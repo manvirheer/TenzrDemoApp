@@ -44,16 +44,6 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net9.0-windows10.0.19041.0'">
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>TenzrDemoApp</RootNamespace>
-    <ApplicationTitle>TenzrDemoApp</ApplicationTitle>
-    <ApplicationId>com.companyname.tenzrdemoapp</ApplicationId>
-    <ApplicationVersion>1.0</ApplicationVersion>
-    <WindowsPackageType>MSIX</WindowsPackageType>
-    <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-</PropertyGroup>
 
 	<ItemGroup>
 		<!-- App Icon -->
