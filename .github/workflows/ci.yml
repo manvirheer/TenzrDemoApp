@@ -19,8 +19,8 @@ env:
 jobs:
   # First job: Build and test the Windows version of the app
   build:
-    name: Build and Test
-    runs-on: windows-latest  #
+    name: Build and Test Windows
+    runs-on: windows-latest
     
     steps:
     # Step 1: Get the source code from the repository
@@ -41,9 +41,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_FILE }} 
     
-    # Step 5: Build the Windows version of the application
-    - name: Build Windows
-      run: dotnet build ${{ env.SOLUTION_FILE }} -c Release -f net9.0-windows10.0.19041.0
+    # Step 5: Build and package the Windows version of the application
+    - name: Build and Package Windows
+      run: dotnet publish ${{ env.SOLUTION_FILE }} -c Release -f net9.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true
       
     # Step 6: Run any unit tests in the solution
     - name: Run tests
@@ -57,7 +57,10 @@ jobs:
         name: windows-app  
         path: | 
           **/bin/Release/**/*.msix
+          **/AppPackages/**/*.msix
           **/bin/Release/**/*.nupkg
+          # Fallback to DLLs if no packages are generated
+          **/bin/Release/**/*.dll
         if-no-files-found: warn  
 
   # Second job: Build the Android version of the app
@@ -91,16 +94,19 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_FILE }}
     
-    # Step 6: Build the Android version of the app
-    - name: Build Android App
-      run: dotnet build ${{ env.SOLUTION_FILE }} -c Release -f net9.0-android
+    # Step 6: Build and package the Android version of the app
+    - name: Build and Package Android App
+      run: dotnet publish ${{ env.SOLUTION_FILE }} -c Release -f net9.0-android /p:AndroidPackageFormat=apk
     
     # Step 7: Save the Android build outputs
     - name: Upload Android build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: android-app  # Name of the artifact
-        path: |  # Files to include
-          **/bin/Release/**/*.apk  # Android application package
-          **/bin/Release/**/*.aab  # Android app bundle (for Play Store)
-        if-no-files-found: warn  # Just warn if no files are found
+        name: android-app
+        path: |
+          **/bin/Release/**/*.apk
+          **/bin/Release/**/*.aab
+          # Fallback to packaged files if no APK/AAB are found
+          **/bin/Release/**/*.android*.dll
+          **/bin/Release/**/*.android*.so
+        if-no-files-found: warn
