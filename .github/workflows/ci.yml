@@ -25,11 +25,11 @@ jobs:
     steps:
     # Step 1: Get the source code from the repository
     - name: Checkout repository
-      uses: actions/checkout@v3 
+      uses: actions/checkout@v4 
     
     # Step 2: Install the .NET SDK matching our version
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}  
     
@@ -52,12 +52,12 @@ jobs:
     
     # Step 7: Save the build output files for later download
     - name: Upload Windows build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: windows-app  
         path: | 
-          **/bin/Release/**/*.msix  # Windows app package
-          **/bin/Release/**/*.nupkg  # NuGet packages
+          **/bin/Release/**/*.msix
+          **/bin/Release/**/*.nupkg
         if-no-files-found: warn  
 
   # Second job: Build the Android version of the app
@@ -68,11 +68,11 @@ jobs:
     steps:
     # Step 1: Get the source code
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     # Step 2: Install .NET SDK
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
@@ -82,7 +82,7 @@ jobs:
     
     # Step 4: Setup Java (required for Android builds)
     - name: Setup Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'microsoft'  
         java-version: '11' 
@@ -97,7 +97,7 @@ jobs:
     
     # Step 7: Save the Android build outputs
     - name: Upload Android build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: android-app  # Name of the artifact
         path: |  # Files to include
