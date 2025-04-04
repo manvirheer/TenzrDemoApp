@@ -50,7 +50,7 @@
     <ApplicationTitle>TenzrDemoApp</ApplicationTitle>
     <ApplicationId>com.companyname.tenzrdemoapp</ApplicationId>
     <ApplicationVersion>1.0</ApplicationVersion>
-    <WindowsPackageType>Msix</WindowsPackageType>
+    <WindowsPackageType>MSIX</WindowsPackageType>
     <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 </PropertyGroup>
